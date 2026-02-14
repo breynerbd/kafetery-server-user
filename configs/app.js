@@ -15,6 +15,7 @@ import promotionRoutes from '../src/promotions/promotion.router.js';
 import menuRoutes from '../src/menus/menu.router.js';
 import tableRoutes from '../src/tables/table.router.js';
 import orderRoutes from '../src/orders/order.router.js';
+import reservationRoutes from '../src/reservations/reservation.router.js';
 
 const BASE_URL = '/kafetery/user/v1';
 
@@ -32,6 +33,7 @@ const routes = (app) => {
     app.use(`${BASE_URL}/menus`, menuRoutes);
     app.use(`${BASE_URL}/tables`, tableRoutes);
     app.use(`${BASE_URL}/orders`, orderRoutes);
+    app.use(`${BASE_URL}/reservations`, reservationRoutes);
 };
 
 const initServerUser = async () => {
