@@ -12,6 +12,9 @@ import { requestLimit } from '../configs/request-limit.js';
 import { errorHandler } from '../configs/handle-errors.js';
 
 import promotionRoutes from '../src/promotions/promotion.router.js';
+import menuRoutes from '../src/menus/menu.router.js';
+import tableRoutes from '../src/tables/table.router.js';
+import orderRoutes from '../src/orders/order.router.js';
 
 const BASE_URL = '/kafetery/user/v1';
 
@@ -26,6 +29,9 @@ const middlewares = (app) => {
 
 const routes = (app) => {
     app.use(`${BASE_URL}/promotions`, promotionRoutes);
+    app.use(`${BASE_URL}/menus`, menuRoutes);
+    app.use(`${BASE_URL}/tables`, tableRoutes);
+    app.use(`${BASE_URL}/orders`, orderRoutes);
 };
 
 const initServerUser = async () => {
