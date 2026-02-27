@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Menu from '../../../server-admin/src/menus/menu.model.js';
+import Menu from '../../../kafetery-server-admin/src/menus/menu.model.js';
 
 const router = Router();
 

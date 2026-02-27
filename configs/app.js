@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 
 import { corsOptions } from '../configs/cors-configuration.js';
-import { dbConnection } from '../../server-admin/configs/db.js';
+import { dbConnection } from '../../kafetery-server-admin/configs/db.js';
 import { helmetConfiguration } from '../configs/helmet-configuration.js';
 import { requestLimit } from '../configs/request-limit.js';
 import { errorHandler } from '../configs/handle-errors.js';

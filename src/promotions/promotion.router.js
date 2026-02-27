@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Promotion from '../../../server-admin/src/promotions/promotion.model.js';
+import Promotion from '../../../kafetery-server-admin/src/promotions/promotion.model.js';
 
 const router = Router();
 

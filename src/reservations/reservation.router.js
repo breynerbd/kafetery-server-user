@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Reservation from '../../../server-admin/src/reservations/reservation.model.js';
+import Reservation from '../../../kafetery-server-admin/src/reservations/reservation.model.js';
 
 const router = Router();
 

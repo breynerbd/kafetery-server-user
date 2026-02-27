@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Table from "../../../server-admin/src/tables/table.model.js";
+import Table from "../../../kafetery-server-admin/src/tables/table.model.js";
 
 const router = Router();
 
