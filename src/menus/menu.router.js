@@ -12,4 +12,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/top', async (req, res) => {
+    try {
+        const top = await Menu.find({ isActive: true })
+            .sort({ salesCount: -1 })
+            .limit(5);
+
+        res.status(200).json({ success: true, data: top });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 export default router;
