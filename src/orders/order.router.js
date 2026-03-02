@@ -1,13 +1,14 @@
 import { Router } from "express";
 import Order from "../../../kafetery-server-admin/src/orders/order.model.js";
 import Menu from "../../../kafetery-server-admin/src/menus/menu.model.js";
+import Promotion from "../../../kafetery-server-admin/src/promotions/promotion.model.js";
 import Table from "../../../kafetery-server-admin/src/tables/table.model.js";
 import User from "../../../kafetery-server-admin/src/users/user.model.js";
 import Restaurant from "../../../kafetery-server-admin/src/restaurants/restaurant.model.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const { userId, restaurantId, status } = req.query;
         const filter = {};
@@ -70,6 +71,51 @@ router.post('/', async (req, res) => {
 
             await menuItem.save();
         }
+
+        const promotions = await Promotion.find({ isActive: true });
+        let discount = 0;
+
+        promotions.forEach(promo => {
+            if (promo.type === "percentage") {
+                discount += subtotal * (promo.value / 100);
+            }
+        });
+
+        const totalPrice = subtotal - discount;
+
+        let assignedTable = null;
+
+        if (isDineIn) {
+            assignedTable = await Table.findOne({
+                restaurant,
+                status: "AVAILABLE"
+            });
+
+            if (!assignedTable) {
+                return res.status(400).json({
+                    success: false,
+                    message: "No tables available"
+                });
+            }
+
+            assignedTable.status = "OCCUPIED";
+            await assignedTable.save();
+        }
+
+        const order = new Order({
+            user,
+            restaurant,
+            items,
+            subtotal,
+            discount,
+            totalPrice,
+            estimatedTime,
+            table: assignedTable?._id
+        });
+
+        await order.save();
+
+        res.status(201).json({ success: true, data: order });
 
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
