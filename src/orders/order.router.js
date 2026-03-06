@@ -1,10 +1,10 @@
 import { Router } from "express";
-import Order from "../../../kafetery-server-admin/src/orders/order.model.js";
-import Menu from "../../../kafetery-server-admin/src/menus/menu.model.js";
-import Promotion from "../../../kafetery-server-admin/src/promotions/promotion.model.js";
-import Table from "../../../kafetery-server-admin/src/tables/table.model.js";
-import User from "../../../kafetery-server-admin/src/users/user.model.js";
-import Restaurant from "../../../kafetery-server-admin/src/restaurants/restaurant.model.js";
+import Order from "./order.model.js";
+import Menu from "../menus/menu.model.js";
+import Promotion from "../promotions/promotion.model.js";
+import Table from "../tables/table.model.js";
+import User from "../users/user.model.js";
+import Restaurant from "../restaurants/restaurant.model.js";
 
 const router = Router();
 

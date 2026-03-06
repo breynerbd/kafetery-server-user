@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Reservation from '../../../kafetery-server-admin/src/reservations/reservation.model.js';
-import Table from '../../../kafetery-server-admin/src/tables/table.model.js';
+import Reservation from './reservation.model.js';
+import Table from '../tables/table.model.js';
 
 const router = Router();
 

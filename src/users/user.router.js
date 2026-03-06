@@ -1,5 +1,5 @@
 import { Router } from "express";
-import User from "../../../kafetery-server-admin/src/users/user.model.js";
+import User from "./user.model.js";
 
 const router = Router();
 
