@@ -1,4 +1,4 @@
-import User from "../../../kafetery-server-admin/src/users/user.model.js";
+import User from "../users/user.model.js";
 
 export const getInternalUser = async (authId, email, name = "Usuario Pendiente") => {
     try {

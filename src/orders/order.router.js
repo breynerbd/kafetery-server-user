@@ -5,44 +5,68 @@ import Promotion from "../promotions/promotion.model.js";
 import Table from "../tables/table.model.js";
 import User from "../users/user.model.js";
 import Restaurant from "../restaurants/restaurant.model.js";
+import { authenticateUser } from "../../middlewares/authenticateUser.js";
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
     try {
-        const { userId, restaurantId, status } = req.query;
-        const filter = {};
-        if (userId) filter.user = userId;
-        if (restaurantId) filter.restaurant = restaurantId;
-        if (status) filter.status = status;
 
-        const orders = await Order.find(filter)
+        const authId = req.user.id;
+
+        const user = await User.findOne({ auth_id: authId });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const orders = await Order.find({
+            user: user._id
+        })
             .populate("user", "name email")
             .populate("restaurant", "name")
             .sort({ createdAt: -1 });
 
-        res.status(200).json({ success: true, data: orders });
+        res.status(200).json({
+            success: true,
+            data: orders
+        });
+
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateUser, async (req, res) => {
     try {
-        const { user, restaurant, items, isDineIn } = req.body;
 
-        const restaurantData = await Restaurant.findById(restaurant);
-        if (!restaurantData) {
-            return res.status(404).json({ success: false, message: "Restaurant not found" });
+        const { restaurant, items } = req.body;
+
+        const authId = req.user.id;
+
+        const user = await User.findOne({ auth_id: authId });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
         }
 
-        const now = new Date();
-        const currentHour = now.getHours();
+        const restaurantData = await Restaurant.findById(restaurant);
 
-        if (currentHour < restaurantData.openHour || currentHour >= restaurantData.closeHour) {
-            return res.status(400).json({
+        if (!restaurantData) {
+            return res.status(404).json({
                 success: false,
-                message: "Restaurant is closed"
+                message: "Restaurant not found"
             });
         }
 
@@ -50,122 +74,47 @@ router.post('/', async (req, res) => {
         let estimatedTime = 0;
 
         for (const item of items) {
+
             const menuItem = await Menu.findById(item.menu);
 
-            if (!menuItem || menuItem.stock <= 0) {
-                return res.status(400).json({
+            if (!menuItem) {
+                return res.status(404).json({
                     success: false,
-                    message: `Item unavailable: ${menuItem?.name}`
+                    message: "Menu item not found"
                 });
             }
 
             subtotal += menuItem.price * item.quantity;
-            estimatedTime += menuItem.prepTime;
-
-            menuItem.stock -= item.quantity;
-            menuItem.salesCount += item.quantity;
-
-            if (menuItem.stock <= 0) {
-                menuItem.status = "OUT_OF_STOCK";
-            }
-
-            await menuItem.save();
+            estimatedTime += menuItem.prepTime * item.quantity;
         }
 
-        const promotions = await Promotion.find({ isActive: true });
-        let discount = 0;
-
-        promotions.forEach(promo => {
-            if (promo.type === "percentage") {
-                discount += subtotal * (promo.value / 100);
-            }
-        });
-
+        const discount = 0;
         const totalPrice = subtotal - discount;
 
-        let assignedTable = null;
-
-        if (isDineIn) {
-            assignedTable = await Table.findOne({
-                restaurant,
-                status: "AVAILABLE"
-            });
-
-            if (!assignedTable) {
-                return res.status(400).json({
-                    success: false,
-                    message: "No tables available"
-                });
-            }
-
-            assignedTable.status = "OCCUPIED";
-            await assignedTable.save();
-        }
-
         const order = new Order({
-            user,
+            user: user._id,
             restaurant,
             items,
             subtotal,
             discount,
             totalPrice,
-            estimatedTime,
-            table: assignedTable?._id
+            estimatedTime
         });
 
         await order.save();
 
-        res.status(201).json({ success: true, data: order });
+        res.status(201).json({
+            success: true,
+            data: order
+        });
 
     } catch (err) {
-        res.status(400).json({ success: false, message: err.message });
-    }
-});
 
-router.patch('/:id/status', async (req, res) => {
-    try {
-        const { status } = req.body;
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
 
-        const order = await Order.findById(req.params.id);
-
-        if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
-        }
-
-        const validTransitions = {
-            pending: ["CONFIRMED", "CANCELLED"],
-            confirmed: ["PREPARING", "CANCELLED"],
-            preparing: ["READY"],
-            ready: ["DELIVERING"],
-            delivered: [],
-            cancelled: []
-        };
-
-        if (!validTransitions[order.status].includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid status transition"
-            });
-        }
-
-        order.status = status;
-
-        if (status === "DELIVERED" && order.table) {
-            const table = await Table.findById(order.table);
-            table.status = "AVAILABLE";
-            await table.save();
-
-            const user = await User.findById(order.user);
-            user.points += Math.floor(order.total / 10);
-            await user.save();
-        }
-
-        await order.save();
-
-        res.status(200).json({ success: true, data: order });
-
-    } catch (err) {
-        res.status(400).json({ success: false, message: err.message });
     }
 });
 

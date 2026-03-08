@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import Restaurant from './restaurant.model.js';
+import { authenticateUser } from '../../middlewares/authenticateUser.js';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
     try {
         const restaurants = await Restaurant.find({ isActive: true });
         res.status(200).json({ success: true, data: restaurants });

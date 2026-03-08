@@ -1,9 +1,10 @@
 import { Router } from "express";
 import Table from "./table.model.js";
+import { authenticateUser } from "../../middlewares/authenticateUser.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authenticateUser, async (req, res) => {
     try {
         const { restaurantId } = req.query;
         const filter = { isActive: true };

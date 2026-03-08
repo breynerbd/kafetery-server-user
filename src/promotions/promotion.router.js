@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import Promotion from './promotion.model.js';
+import { authenticateUser } from '../../middlewares/authenticateUser.js';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
     try {
         const promotions = await Promotion.find({ isActive: true });
         res.status(200).json({ success: true, data: promotions });
