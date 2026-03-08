@@ -3,6 +3,13 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    auth_id: {
+        type: String,
+        required: [true, 'El auth_id es obligatorio'],
+        trim: true,
+        unique: true,
+    },
+
     name: {
         type: String,
         required: [true, 'El nombre es obligatorio'],
@@ -17,12 +24,6 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         match: [/.+\@.+\..+/, 'Correo no válido'],
-    },
-
-    password: {
-        type: String,
-        required: [true, 'La contraseña es obligatoria'],
-        minLength: [6, 'La contraseña debe tener al menos 6 caracteres'],
     },
 
     role: {
