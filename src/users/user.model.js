@@ -5,9 +5,9 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     auth_id: {
         type: String,
-        required: [true, 'El auth_id es obligatorio'],
         trim: true,
         unique: true,
+        sparse: true
     },
 
     name: {
@@ -17,6 +17,18 @@ const userSchema = new mongoose.Schema({
         maxLength: [100, 'El nombre no puede exceder 100 caracteres'],
     },
 
+    surname: {
+        type: String,
+        trim: true,
+        maxLength: [100, 'El apellido no puede exceder 100 caracteres'],
+    },
+
+    username: {
+        type: String,
+        trim: true,
+        unique: true,
+    },
+
     email: {
         type: String,
         required: [true, 'El correo es obligatorio'],
@@ -24,6 +36,11 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         match: [/.+\@.+\..+/, 'Correo no válido'],
+    },
+
+    password: {
+        type: String,
+        required: [true, 'La contraseña es obligatoria'],
     },
 
     role: {
