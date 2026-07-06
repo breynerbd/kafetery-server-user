@@ -60,6 +60,22 @@ const orderSchema = new mongoose.Schema({
         default: 'PENDING',
     },
 
+    paymentMethod: {
+        type: String,
+        enum: ["CASH", "CARD"],
+    },
+
+    paymentStatus: {
+        type: String,
+        enum: ["PENDING", "PAID"],
+        default: "PENDING",
+    },
+
+    paymentCard: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PaymentMethod",
+    },
+
     isActive: {
         type: Boolean,
         default: true,
