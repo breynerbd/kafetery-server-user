@@ -11,7 +11,8 @@ router.get('/points', authenticateUser, async (req, res) => {
         const { id: userId } = req.user;
 
         const user = await User.findOne({ auth_id: userId })
-            .select("name email loyaltyPoints");
+            .select("name email loyaltyPoints")
+            .populate("totalOrders loyaltyPoints");
 
         if (!user) {
             return res.status(404).json({
@@ -55,15 +56,18 @@ router.get('/profile', authenticateUser, async (req, res) => {
 
         const user = await getInternalUser(userId, email, name);
 
-        res.status(200).json({
+        return res.json({
             success: true,
             data: {
+                id: user.auth_id,
                 name: user.name,
+                surname: user.surname,
+                username: user.username,
                 email: user.email,
-                points: user.loyaltyPoints || 0
+                loyaltyPoints: user.loyaltyPoints,
+                totalOrders: user.totalOrders
             }
         });
-
     } catch (err) {
         console.error("Error getting profile:", err);
         res.status(500).json({
@@ -93,7 +97,8 @@ router.put('/profile', authenticateUser, async (req, res) => {
             data: {
                 name: user.name,
                 email: user.email,
-                points: user.loyaltyPoints || 0
+                points: user.loyaltyPoints || 0,
+                totalOrders: user.totalOrders || 0
             }
         });
 
