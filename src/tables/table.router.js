@@ -10,7 +10,21 @@ router.get("/", authenticateUser, async (req, res) => {
         const filter = { isActive: true };
         if (restaurantId) filter.restaurant = restaurantId;
 
-        const tables = await Table.find(filter).sort({ tableNumber: 1 });
+        const tables = await Table.find(filter)
+            .populate("restaurant", "name")
+            .sort({ tableNumber: 1 });
+        res.status(200).json({ success: true, data: tables });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+router.get("/restaurant/:restaurantId", authenticateUser, async (req, res) => {
+    try {
+        const { restaurantId } = req.params;
+        const tables = await Table.find({ restaurant: restaurantId, isActive: true })
+            .populate("restaurant", "name")
+            .sort({ tableNumber: 1 });
         res.status(200).json({ success: true, data: tables });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

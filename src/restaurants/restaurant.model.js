@@ -14,9 +14,15 @@ const restaurantSchema = new mongoose.Schema({
         trim: true,
         maxLength: [500, 'La descripción no puede exceder 500 caracteres'],
     },
-    address: {
-        type: String,
-        required: [true, 'La dirección es obligatoria'],
+    location: {
+        latitude: {
+            type: Number,
+            required: true
+        },
+        longitude: {
+            type: Number,
+            required: true
+        }
     },
     phone: {
         type: String,
@@ -30,12 +36,12 @@ const restaurantSchema = new mongoose.Schema({
 
 
     openingTime: {
-        type: String, // "08:00"
+        type: String,
         required: true
     },
 
     closingTime: {
-        type: String, // "22:00"
+        type: String,
         required: true
     },
 

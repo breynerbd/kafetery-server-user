@@ -44,17 +44,22 @@ const menuSchema = new mongoose.Schema({
     },
 
     availableFrom: {
-        type: String, // "08:00"
+        type: String,
     },
 
     availableTo: {
-        type: String, // "22:00"
+        type: String,
     },
 
     restaurant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Restaurant',
         required: [true, 'El restaurante es obligatorio'],
+    },
+
+    image: {
+        type: String,
+        default: null,
     },
 
     isActive: {
