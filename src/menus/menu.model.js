@@ -62,6 +62,46 @@ const menuSchema = new mongoose.Schema({
         default: null,
     },
 
+    ratings: [
+        {
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: true
+            },
+            order: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Order",
+                required: true
+            },
+            stars: {
+                type: Number,
+                min: 1,
+                max: 5,
+                required: true
+            },
+            comment: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
+
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+
+    totalRatings: {
+        type: Number,
+        default: 0
+    },
+
     isActive: {
         type: Boolean,
         default: true,

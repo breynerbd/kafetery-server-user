@@ -7,6 +7,7 @@ import PaymentMethod from "../paymentsMethod/payment.model.js";
 
 export const getOrders = async (req, res) => {
     try {
+
         const authId = req.user.id;
 
         const user = await User.findOne({
@@ -30,8 +31,10 @@ export const getOrders = async (req, res) => {
             .populate({
                 path: "items.menu",
                 select: "name price"
-            })
-            .sort({ createdAt: -1 });
+            });
+
+        console.log("req.user:", req.user);
+        console.log("authId:", req.user.id);
 
         return res.status(200).json({
             success: true,
@@ -39,12 +42,16 @@ export const getOrders = async (req, res) => {
         });
 
     } catch (err) {
+        console.error("ERROR getOrders:", err);
+        console.error(err.stack);
+
+        console.log("req.user:", req.user);
+        console.log("authId:", req.user.id);
 
         return res.status(500).json({
             success: false,
             message: err.message
         });
-
     }
 };
 
@@ -348,6 +355,90 @@ export const completeOrder = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: err.message,
+        });
+    }
+};
+
+export const reviewOrder = async (req, res) => {
+    try {
+        const authId = req.user.id;
+        const user = await User.findOne({ auth_id: authId });
+
+        if (!user) return res.status(404).json({
+            success: false,
+            message: "Usuario no encontrado"
+        });
+
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json(
+            {
+                success: false,
+                message: "Orden no encontrada"
+            });
+
+        if (!order.user.equals(user._id)) return res.status(403).json(
+            {
+                success: false,
+                message: "No autorizado"
+            });
+
+        if (order.status !== "DELIVERED") return res.status(400).json(
+            {
+                success: false,
+                message: "Orden no entregada"
+            });
+
+        if (order.reviewed) return res.status(400).json({
+            success: false,
+            message: "Ya calificada"
+        });
+
+        const { restaurantRating, restaurantComment, menus } = req.body;
+
+        const restaurant = await Restaurant.findById(order.restaurant);
+        if (!restaurant) return res.status(404).json({
+            success: false,
+            message: "Restaurante no encontrado"
+        });
+
+        restaurant.ratings.push({
+            user: user._id,
+            order: order._id,
+            stars: restaurantRating,
+            comment: restaurantComment
+        });
+
+        restaurant.totalRatings = restaurant.ratings.length;
+        restaurant.averageRating = restaurant.ratings.reduce((sum, r) => sum + r.stars, 0) / restaurant.totalRatings;
+        await restaurant.save();
+
+        await Promise.all(menus.map(async (item) => {
+            const menu = await Menu.findById(item.menu);
+            if (menu) {
+                menu.ratings.push({
+                    user: user._id,
+                    order: order._id,
+                    stars: item.rating,
+                    comment: item.comment
+                });
+                menu.totalRatings = menu.ratings.length;
+                menu.averageRating = menu.ratings.reduce((sum, r) => sum + r.stars, 0) / menu.totalRatings;
+                await menu.save();
+            }
+        }));
+
+        order.reviewed = true;
+        await order.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Calificación enviada correctamente"
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 };

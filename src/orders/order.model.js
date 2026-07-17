@@ -76,6 +76,11 @@ const orderSchema = new mongoose.Schema({
         ref: "PaymentMethod",
     },
 
+    reviewed: {
+        type: Boolean,
+        default: false
+    },
+
     isActive: {
         type: Boolean,
         default: true,

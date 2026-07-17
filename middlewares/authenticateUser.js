@@ -9,6 +9,10 @@ export const authenticateUser = (req, res, next) => {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+
+        console.log("TOKEN DECODIFICADO");
+        console.log(decoded);
+
         req.user = {
             id: decoded.sub,
             email: decoded.email,

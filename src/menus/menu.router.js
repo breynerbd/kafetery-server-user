@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/', authenticateUser, async (req, res) => {
     try {
-        const menus = await Menu.find({ isActive: true }).populate('restaurant', 'name');
+        const menus = await Menu.find({ isActive: true }).populate('restaurant', 'name').populate('ratings.user', 'name');
         res.status(200).json({ success: true, data: menus });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
